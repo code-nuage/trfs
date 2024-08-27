@@ -1,24 +1,45 @@
 #!/bin/bash
 
 DIR=$(pwd)
+CONFIG_FILE="${DIR}/.trfs"
 
-if [ ! -f "${DIR}/.trfs" ]; then
-    echo "Creating config file \"${DIR}/.trfs\""
-    touch "${DIR}/.trfs"
-    echo "DIS=NULL" > "${DIR}/.trfs"
+# Vérification et création du fichier de configuration
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Creating config file \"$CONFIG_FILE\""
+    touch "$CONFIG_FILE"
+    echo "DIS=NULL" > "$CONFIG_FILE"
 fi
 
-source ./.trfs
+# Chargement de la configuration
+source "$CONFIG_FILE"
 
-if [ $1 = 'pull' ]; then
-    echo "Moving $DIS to ${DIR}/.."
-    scp -r $DIS $DIR/..
-elif [ $1 = 'push' ]; then
-    echo "Moving ${DIR} to $DIS/.."
-    scp -r $DIR $DIS/..
-elif [ $1 = "connect" ]; then
-    echo "trfs connected to $2"
-    sed -i "s|DIS=.*|DIS=$2|" .trfs
-else
-    echo 'trfs <pull / push> <server host>'
-fi
+# Gestion des commandes
+case "$1" in
+    "pull")
+        if [ "$DIS" = "NULL" ]; then
+            echo "Error: DIS is not configured. Use 'connect' to configure it."
+            exit 1
+        fi
+        echo "Moving $DIS to ${DIR}/.."
+        scp -r "$DIS" "${DIR}/.."
+        ;;
+    "push")
+        if [ "$DIS" = "NULL" ]; then
+            echo "Error: DIS is not configured. Use 'connect' to configure it."
+            exit 1
+        fi
+        echo "Moving ${DIR} to $DIS/.."
+        scp -r "$DIR" "$DIS/.."
+        ;;
+    "connect")
+        if [ -z "$2" ]; then
+            echo "Error: Please specify a server to connect to."
+            exit 1
+        fi
+        echo "trfs connected to $2"
+        sed -i "s|DIS=.*|DIS=$2|" "$CONFIG_FILE"
+        ;;
+    *)
+        echo 'Usage: trfs <pull / push / connect> <server host>'
+        ;;
+esac
