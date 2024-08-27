@@ -3,17 +3,17 @@
 DIR=$(pwd)
 CONFIG_FILE="${DIR}/.trfs"
 
-# Vérification et création du fichier de configuration
+# Verification and creation of configuration file
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "Creating config file \"$CONFIG_FILE\""
     touch "$CONFIG_FILE"
     echo "DIS=NULL" > "$CONFIG_FILE"
 fi
 
-# Chargement de la configuration
+# Configuration loading
 source "$CONFIG_FILE"
 
-# Gestion des commandes
+# Arguments
 case "$1" in
     "pull")
         if [ "$DIS" = "NULL" ]; then
